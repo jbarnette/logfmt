@@ -1,4 +1,4 @@
-at=string value=string with spaces
+at=string "string with spaces"=value value="string with spaces"
 at=bool false=false true=true
 at=number v1=1 v2=1.001
 not a json line

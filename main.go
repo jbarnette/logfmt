@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,6 +37,9 @@ func (g globs) Match(s string) bool {
 
 	return false
 }
+
+// simple strings are not quoted
+var simple = regexp.MustCompile("^[-+_/:|@.a-zA-Z0-9]+$")
 
 func main() {
 	var excluded globs
@@ -147,7 +151,7 @@ func writeKeyValue(w io.Writer, key string, value interface{}, color bool) error
 		}
 	}
 
-	if err := writeKey(w, key); err != nil {
+	if err := writeString(w, key); err != nil {
 		return err
 	}
 
@@ -168,65 +172,60 @@ func writeKeyValue(w io.Writer, key string, value interface{}, color bool) error
 	return nil
 }
 
-func writeKey(w io.Writer, key string) error {
-	if _, err := w.Write([]byte(key)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func writeValue(w io.Writer, value interface{}) error {
 	switch v := value.(type) {
 	case bool:
-		return writeBoolValue(w, v)
+		return writeBool(w, v)
 
 	case float64:
-		return writeFloat64Value(w, v)
+		return writeFloat64(w, v)
 
 	case string:
-		return writeStringValue(w, v)
+		return writeString(w, v)
 
 	case nil:
-		return writeNullValue(w)
+		return writeNull(w)
 
 	case []interface{}:
-		return writeArrayValue(w, v)
+		return writeArray(w, v)
 
 	case map[string]interface{}:
-		return writeObjectValue(w, v)
+		return writeObject(w, v)
 
 	default:
 		return fmt.Errorf("logfmt: unsupported value type: %T", v)
 	}
 }
 
-func writeBoolValue(w io.Writer, value bool) error {
-	_, err := w.Write([]byte(strconv.FormatBool(value)))
+func writeBool(w io.Writer, b bool) error {
+	_, err := w.Write([]byte(strconv.FormatBool(b)))
 	return err
 }
 
-func writeFloat64Value(w io.Writer, f float64) error {
+func writeFloat64(w io.Writer, f float64) error {
 	_, err := w.Write([]byte(strconv.FormatFloat(f, 'g', 4, 64)))
 	return err
 }
 
-func writeStringValue(w io.Writer, value string) error {
-	_, err := w.Write([]byte(value))
+func writeString(w io.Writer, s string) error {
+	if !simple.MatchString(s) {
+		s = strconv.Quote(s)
+	}
+	_, err := w.Write([]byte(s))
 	return err
 }
 
-func writeNullValue(w io.Writer) error {
+func writeNull(w io.Writer) error {
 	_, err := w.Write([]byte("null"))
 	return err
 }
 
-func writeArrayValue(w io.Writer, values []interface{}) error {
+func writeArray(w io.Writer, a []interface{}) error {
 	if _, err := w.Write([]byte("[")); err != nil {
 		return err
 	}
 
-	for i, v := range values {
+	for i, v := range a {
 		if i > 0 {
 			if _, err := w.Write([]byte(" ")); err != nil {
 				return err
@@ -245,19 +244,19 @@ func writeArrayValue(w io.Writer, values []interface{}) error {
 	return nil
 }
 
-func writeObjectValue(w io.Writer, obj map[string]interface{}) error {
+func writeObject(w io.Writer, o map[string]interface{}) error {
 	if _, err := w.Write([]byte("{")); err != nil {
 		return err
 	}
 
-	for i, k := range sortedKeys(obj) {
+	for i, k := range sortedKeys(o) {
 		if i > 0 {
 			if _, err := w.Write([]byte(" ")); err != nil {
 				return err
 			}
 		}
 
-		if err := writeKeyValue(w, k, obj[k], false); err != nil {
+		if err := writeKeyValue(w, k, o[k], false); err != nil {
 			return err
 		}
 	}

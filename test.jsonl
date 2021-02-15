@@ -1,4 +1,4 @@
-{"at":"string","value":"string with spaces"}
+{"at":"string","value":"string with spaces","string with spaces":"value"}
 {"at":"bool","true":true,"false":false}
 {"at":"number","v1":1.0001,"v2":1.0006}
 
