@@ -234,7 +234,7 @@ func writeArrayValue(w io.Writer, values []interface{}) error {
 }
 
 func writeObjectValue(w io.Writer, obj map[string]interface{}) error {
-	if _, err := w.Write([]byte("[")); err != nil {
+	if _, err := w.Write([]byte("{")); err != nil {
 		return err
 	}
 
@@ -250,7 +250,7 @@ func writeObjectValue(w io.Writer, obj map[string]interface{}) error {
 		}
 	}
 
-	if _, err := w.Write([]byte("]")); err != nil {
+	if _, err := w.Write([]byte("}")); err != nil {
 		return err
 	}
 

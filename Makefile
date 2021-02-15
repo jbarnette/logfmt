@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: test test.out
 
 cmd = go run . -x ignored.*
 
