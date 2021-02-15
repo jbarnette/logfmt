@@ -68,8 +68,20 @@ func main() {
 
 		data := map[string]interface{}{}
 		if err := json.Unmarshal(line, &data); err != nil {
+			if color {
+				if _, err := w.Write([]byte("\033[0;33m")); err != nil {
+					panic(err)
+				}
+			}
+
 			if err := writeLine(os.Stderr, line); err != nil {
 				panic(err)
+			}
+
+			if color {
+				if _, err := w.Write([]byte("\033[0m")); err != nil {
+					panic(err)
+				}
 			}
 
 			continue
