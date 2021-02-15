@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/mattn/go-isatty"
 )
 
 type globs []string
@@ -42,6 +44,7 @@ func main() {
 
 	flag.Parse()
 
+	color := isatty.IsTerminal(os.Stdout.Fd())
 	r := bufio.NewReaderSize(os.Stdin, 64*1024)
 	w := os.Stdout
 
@@ -84,7 +87,7 @@ func main() {
 				}
 			}
 
-			if err := writeKeyValue(w, k, data[k]); err != nil {
+			if err := writeKeyValue(w, k, data[k], color); err != nil {
 				panic(err)
 			}
 		}
@@ -112,13 +115,26 @@ func writeLine(w io.Writer, line []byte) error {
 	return err
 }
 
-func writeKeyValue(w io.Writer, key string, value interface{}) error {
+// writeKeyValue writes "key=value" to w. The "key=" part is highlighted if color is true.
+func writeKeyValue(w io.Writer, key string, value interface{}, color bool) error {
+	if color {
+		if _, err := w.Write([]byte("\033[0;36m")); err != nil {
+			return err
+		}
+	}
+
 	if err := writeKey(w, key); err != nil {
 		return err
 	}
 
 	if _, err := w.Write([]byte("=")); err != nil {
 		return err
+	}
+
+	if color {
+		if _, err := w.Write([]byte("\033[0m")); err != nil {
+			return err
+		}
 	}
 
 	if err := writeValue(w, value); err != nil {
@@ -217,7 +233,7 @@ func writeObjectValue(w io.Writer, obj map[string]interface{}) error {
 			}
 		}
 
-		if err := writeKeyValue(w, k, obj[k]); err != nil {
+		if err := writeKeyValue(w, k, obj[k], false); err != nil {
 			return err
 		}
 	}
