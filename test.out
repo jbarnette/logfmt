@@ -1,0 +1,7 @@
+at=string value=string with spaces
+at=bool false=false true=true
+at=number value=1.1
+not a json line
+at=null null=null
+at=array value=[v1 v2]
+at=object value=[k1=v1 k2=v2]
