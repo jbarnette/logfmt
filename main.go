@@ -112,13 +112,20 @@ func main() {
 	}
 }
 
-// sortedKeys returns a slice containing data's keys, sorted alphabetically.
+// sortedKeys returns a slice containing data's keys, sorted mostly alphabetically.
 func sortedKeys(data map[string]interface{}) (keys []string) {
 	for k := range data {
-		keys = append(keys, k)
+		if k != "at" {
+			keys = append(keys, k)
+		}
 	}
 
 	sort.Strings(keys)
+
+	if _, ok := data["at"]; ok {
+		keys = append([]string{"at"}, keys...)
+	}
+
 	return
 }
 
