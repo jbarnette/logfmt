@@ -3,13 +3,45 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 )
 
+type globs []string
+
+func (g *globs) String() string {
+	return strings.Join(*g, ", ")
+}
+
+func (g *globs) Set(value string) error {
+	*g = append(*g, value)
+	return nil
+}
+
+// Match returns true if any of the globs match the provided string.
+func (g globs) Match(s string) bool {
+	for _, glob := range g {
+		if matched, _ := filepath.Match(glob, s); matched {
+			return true
+		}
+	}
+
+	return false
+}
+
 func main() {
+	var excluded globs
+
+	flag.Var(&excluded, "x",
+		"Don't print keys matching this glob")
+
+	flag.Parse()
+
 	r := bufio.NewReaderSize(os.Stdin, 64*1024)
 	w := os.Stdout
 
@@ -42,6 +74,10 @@ func main() {
 
 		keys := sortedKeys(data)
 		for i, k := range keys {
+			if excluded.Match(k) {
+				continue
+			}
+
 			if i > 0 {
 				if _, err := w.Write([]byte(" ")); err != nil {
 					panic(err)

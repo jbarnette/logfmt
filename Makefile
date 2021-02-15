@@ -1,7 +1,9 @@
 .PHONY: test
 
+cmd = go run . -x ignored.*
+
 test:
-	go run . < test.jsonl 2>&1 | diff -u test.out -
+	$(cmd) < test.jsonl 2>&1 | diff -u test.out -
 
 test.out: test.jsonl
-	go run . < $< 2>&1 | cat > $@
+	$(cmd) < $< 2>&1 | cat > $@

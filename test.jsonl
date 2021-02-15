@@ -7,3 +7,5 @@ not a json line
 {"at":"null","null":null}
 {"at":"array","value":["v1","v2"]}
 {"at":"object","value":{"k1":"v1","k2":"v2"}}
+
+{"at":"ignore","ignored.k1":"v1","ignored.k2":"v2"}
