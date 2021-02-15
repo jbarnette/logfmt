@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/mattn/go-isatty"
@@ -130,7 +131,11 @@ func sortedKeys(data map[string]interface{}) (keys []string) {
 }
 
 func writeLine(w io.Writer, line []byte) error {
-	_, err := fmt.Fprintf(w, "%s\n", line)
+	if _, err := w.Write(line); err != nil {
+		return err
+	}
+
+	_, err := w.Write([]byte("\n"))
 	return err
 }
 
@@ -197,17 +202,17 @@ func writeValue(w io.Writer, value interface{}) error {
 }
 
 func writeBoolValue(w io.Writer, value bool) error {
-	_, err := fmt.Fprintf(w, "%v", value)
+	_, err := w.Write([]byte(strconv.FormatBool(value)))
 	return err
 }
 
-func writeFloat64Value(w io.Writer, value float64) error {
-	_, err := fmt.Fprintf(w, "%v", value)
+func writeFloat64Value(w io.Writer, f float64) error {
+	_, err := w.Write([]byte(strconv.FormatFloat(f, 'g', 4, 64)))
 	return err
 }
 
 func writeStringValue(w io.Writer, value string) error {
-	_, err := fmt.Fprintf(w, "%v", value)
+	_, err := w.Write([]byte(value))
 	return err
 }
 

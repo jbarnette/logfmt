@@ -1,6 +1,6 @@
 at=string value=string with spaces
 at=bool false=false true=true
-at=number value=1.1
+at=number v1=1 v2=1.001
 not a json line
 at=null null=null
 at=array value=[v1 v2]
